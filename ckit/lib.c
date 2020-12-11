@@ -5,7 +5,12 @@
 #include <c/GraphQLParser.h>
 #include <c/GraphQLAstNode.h>
 #include <c/GraphQLAst.h>
-#include <c/GraphQLAstToJSON.h>
+
+//#define printf
+
+static void stackDump(lua_State *L);
+
+static const struct GraphQLAstVisitorCallbacks LuaAstVisitorCallbacks;
 
 static int
 visit_document(const struct GraphQLAstDocument *def, void *arg)
@@ -34,6 +39,7 @@ end_visit_document(const struct GraphQLAstDocument *def, void *arg)
 static int
 visit_operation_definition(const struct GraphQLAstOperationDefinition *def, void *arg)
 {
+	printf("visit_operation_definition\n");
 	struct lua_State *L = arg;
 
 	// len = #definitions
@@ -54,6 +60,13 @@ visit_operation_definition(const struct GraphQLAstOperationDefinition *def, void
 	lua_pushstring(L, operation);
 	lua_settable(L, -3);
 
+	int var_def_size = GraphQLAstOperationDefinition_get_variable_definitions_size(def);
+	if (var_def_size > 0) {
+		lua_pushstring(L, "variableDefinitions");
+		lua_createtable(L, var_def_size, 0);
+		lua_settable(L, -3);
+	}
+
 	return 1;
 }
 
@@ -61,6 +74,7 @@ static void
 end_visit_operation_definition(const struct GraphQLAstOperationDefinition *def, void *arg)
 {
 	struct lua_State *L = arg;
+
 	// definitions[len + 1]: }
 	lua_settable(L, -3);
 }
@@ -69,6 +83,8 @@ static int
 visit_selection_set(const struct GraphQLAstSelectionSet *def, void *arg)
 {
 	struct lua_State *L = arg;
+
+	printf("visit_selection_set\n");
 
 	// selectionSet: {
 	lua_pushstring(L, "selectionSet");
@@ -89,6 +105,7 @@ visit_selection_set(const struct GraphQLAstSelectionSet *def, void *arg)
 static void
 end_visit_selection_set(const struct GraphQLAstSelectionSet *def, void *arg)
 {
+	printf("end_visit_selection_set\n");
 	struct lua_State *L = arg;
 
 	// selections: ]
@@ -141,6 +158,25 @@ end_visit_field(const struct GraphQLAstField *def, void *arg)
 {
 	printf("end_visit_field\n");
 	struct lua_State *L = arg;
+
+	const struct GraphQLAstName *alias_node = GraphQLAstField_get_alias(def);
+	if (alias_node != NULL) {
+		const char *text = GraphQLAstName_get_value(alias_node);
+		printf("alias %s", text);
+
+		lua_pushstring(L, "alias");
+		lua_newtable(L);
+
+		lua_pushstring(L, "kind");
+		lua_pushstring(L, "alias");
+		lua_settable(L, -3);
+
+		graphql_node_visit((const struct GraphQLAstNode *)alias_node,
+				&LuaAstVisitorCallbacks, L);
+
+		lua_settable(L, -3);
+	}
+
 	// selections[len + 1]: }
 	lua_settable(L, -3);
 }
@@ -180,14 +216,63 @@ end_visit_name(const struct GraphQLAstName *def, void *arg)
 static int
 visit_variable_definition(const struct GraphQLAstVariableDefinition *def, void *arg)
 {
-	printf("visit_field_definition\n");
+	printf("visit_variable_definition\n");
+	struct lua_State *L = arg;
+
+	lua_getfield(L, -1, "variableDefinitions");
+
+	// len = #variableDefinitions
+	size_t len = lua_objlen(L, -1);
+	printf("variableDefinitions len %lu\n", len);
+
+	// arguments[len + 1]: {
+	lua_pushinteger(L, len + 1);
+	lua_newtable(L);
+	printf("visit_variable_definition top %d\n", lua_gettop(L));
+
+//	lua_pushstring(L, "type");
+//	lua_newtable(L);
+//	lua_settable(L, -3);
+
+//	lua_pushstring(L, "variable");
+//	lua_newtable(L);
+//	lua_settable(L, -3);
+
 	return 1;
 }
 
 static void
 end_visit_variable_definition(const struct GraphQLAstVariableDefinition *def, void *arg)
 {
-	printf("end_visit_field_definition\n");
+	printf("end_visit_variable_definition\n");
+	struct lua_State *L = arg;
+
+	printf("end_visit_variable_definition top %d\n", lua_gettop(L));
+
+	const struct GraphQLAstValue *def_node =  GraphQLAstVariableDefinition_get_default_value(def);
+	if (def_node != NULL) {
+		lua_pushstring(L, "defaultValue");
+		lua_insert(L, -2);
+		lua_settable(L, -5);
+	}
+
+	stackDump(L);
+
+	lua_pushstring(L, "type");
+	lua_insert(L, -2);
+	lua_settable(L, -4);
+
+	lua_pushstring(L, "variable");
+	lua_insert(L, -2);
+	lua_settable(L, -3);
+
+	lua_pushstring(L, "kind");
+	lua_pushstring(L, "variableDefinition");
+	lua_settable(L, -3);
+
+	lua_settable(L, -3);
+
+	lua_pop(L, 1);
 }
 
 static int
@@ -265,13 +350,15 @@ end_visit_argument(const struct GraphQLAstArgument *def, void *arg)
 static int
 visit_variable(const struct GraphQLAstVariable *def, void *arg)
 {
-	printf("visit_variable\n");
+	const struct GraphQLAstName *name_node = GraphQLAstVariable_get_name(def);
+	const char *name = GraphQLAstName_get_value(name_node);
+
+	printf("visit_variable %s\n", name);
 
 	struct lua_State *L = arg;
-
-	// "value": {
-	lua_pushstring(L, "value");
+//	lua_getfield(L, -1, "variable");
 	lua_newtable(L);
+	printf("visit_variable top %d\n", lua_gettop(L));
 
 	lua_pushstring(L, "kind");
 	lua_pushstring(L, "variable");
@@ -284,9 +371,8 @@ static void
 end_visit_variable(const struct GraphQLAstVariable *def, void *arg)
 {
 	printf("end_visit_variable\n");
-	// "value": }
 	struct lua_State *L = arg;
-	lua_settable(L, -3);
+//	lua_pop(L, 1);
 }
 
 static int
@@ -362,7 +448,7 @@ end_visit_object_value(const struct GraphQLAstObjectValue *def, void *arg)
 	lua_settable(L, -3);
 
 	lua_pushstring(L, "kind");
-	lua_pushstring(L, "InputObject");
+	lua_pushstring(L, "inputObject");
 	lua_settable(L, -3);
 
 
@@ -392,6 +478,13 @@ end_visit_object_field(const struct GraphQLAstObjectField *def, void *arg)
 	struct lua_State *L = arg;
 	lua_pushstring(L, "value");
 	lua_insert(L, -2);
+	lua_settable(L, -3);
+
+	const struct GraphQLAstName *name_node = GraphQLAstObjectField_get_name(def);
+	const char *name = GraphQLAstName_get_value(name_node);
+
+	lua_pushstring(L, "name");
+	lua_pushstring(L, name);
 	lua_settable(L, -3);
 }
 
@@ -542,16 +635,131 @@ end_visit_list_value(const struct GraphQLAstListValue *def, void *arg)
 }
 
 static int
+visit_named_type(const struct GraphQLAstNamedType *def, void *arg)
+{
+	printf("visit_named_type\n");
+	struct lua_State *L = arg;
+
+//	lua_getfield(L, -1, "type");
+	lua_newtable(L);
+	printf("visit_named_type top %d\n", lua_gettop(L));
+
+	lua_pushstring(L, "kind");
+	lua_pushstring(L, "namedType");
+	lua_settable(L, -3);
+
+	return 1;
+}
+
+static void
+end_visit_named_type(const struct GraphQLAstNamedType *def, void *arg)
+{
+	printf("end_visit_named_type\n");
+	struct lua_State *L = arg;
+}
+
+static int
+visit_non_null_type(const struct GraphQLAstNonNullType *def, void *arg)
+{
+	printf("visit_non_null_type\n");
+
+	struct lua_State *L = arg;
+
+	lua_newtable(L);
+
+	return 1;
+}
+
+static void
+end_visit_non_null_type(const struct GraphQLAstNonNullType *def, void *arg)
+{
+	printf("end_visit_non_null_type\n");
+
+	struct lua_State *L = arg;
+
+	lua_pushstring(L, "type");
+	lua_insert(L, -2);
+	lua_settable(L, -3);
+
+	lua_pushstring(L, "kind");
+	lua_pushstring(L, "nonNullType");
+	lua_settable(L, -3);
+}
+
+static int
+visit_list_type(const struct GraphQLAstListType *def, void *arg)
+{
+	printf("visit_list_type\n");
+
+	struct lua_State *L = arg;
+
+	lua_newtable(L);
+
+	return 1;
+}
+
+static void
+end_visit_list_type(const struct GraphQLAstListType *def, void *arg)
+{
+	printf("end_visit_list_type\n");
+
+	struct lua_State *L = arg;
+
+	lua_pushstring(L, "type");
+	lua_insert(L, -2);
+	lua_settable(L, -3);
+
+	lua_pushstring(L, "kind");
+	lua_pushstring(L, "listType");
+	lua_settable(L, -3);
+}
+
+static int
+visit_fragment_definition(const struct GraphQLAstFragmentDefinition *def, void *arg)
+{
+	printf("visit_fragment_definition\n");
+	struct lua_State *L = arg;
+
+	// len = #definitions
+	size_t len = lua_objlen(L, -1);
+
+	// definitions[len + 1]: {
+	lua_pushinteger(L, len + 1);
+	lua_newtable(L);
+
+	// kind: fragmentDefinition
+	lua_pushstring(L, "kind");
+	lua_pushstring(L, "fragmentDefinition");
+	lua_settable(L, -3);
+
+	return 1;
+}
+
+static void
+end_visit_fragment_definition(const struct GraphQLAstFragmentDefinition *def, void *arg)
+{
+	printf("end_visit_fragment_definition\n");
+	stackDump(arg);
+	struct lua_State *L = arg;
+
+	lua_pushstring(L, "typeCondition");
+	lua_insert(L, -2);
+	lua_settable(L, -3);
+
+	lua_settable(L, -3);
+}
+
+static int
 visit_common()
 {
-	printf("visit_common");
+	printf("visit_common\n");
 	return 1;
 }
 
 static void
 end_visit_common()
 {
-	printf("end_visit_common");
+	printf("end_visit_common\n");
 }
 
 static const struct GraphQLAstVisitorCallbacks LuaAstVisitorCallbacks = {
@@ -571,8 +779,8 @@ static const struct GraphQLAstVisitorCallbacks LuaAstVisitorCallbacks = {
 		.end_visit_fragment_spread = NULL,
 		.visit_inline_fragment = visit_common,
 		.end_visit_inline_fragment = NULL,
-		.visit_fragment_definition = visit_common,
-		.end_visit_fragment_definition = NULL,
+		.visit_fragment_definition = visit_fragment_definition,
+		.end_visit_fragment_definition = end_visit_fragment_definition,
 		.visit_variable = visit_variable,
 		.end_visit_variable = end_visit_variable,
 		.visit_int_value = visit_int_value,
@@ -595,12 +803,12 @@ static const struct GraphQLAstVisitorCallbacks LuaAstVisitorCallbacks = {
 		.end_visit_object_field = end_visit_object_field,
 		.visit_directive = visit_directive,
 		.end_visit_directive = end_visit_directive,
-		.visit_named_type = visit_common,
-		.end_visit_named_type = NULL,
-		.visit_list_type = visit_common,
-		.end_visit_list_type = NULL,
-		.visit_non_null_type = visit_common,
-		.end_visit_non_null_type = NULL,
+		.visit_named_type = visit_named_type,
+		.end_visit_named_type = end_visit_named_type,
+		.visit_list_type = visit_list_type,
+		.end_visit_list_type = end_visit_list_type,
+		.visit_non_null_type = visit_non_null_type,
+		.end_visit_non_null_type = end_visit_non_null_type,
 		.visit_name = visit_name,
 		.end_visit_name = end_visit_name,
 		.visit_schema_definition = visit_common,
