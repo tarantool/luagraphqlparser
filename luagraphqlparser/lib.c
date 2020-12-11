@@ -36,7 +36,6 @@ end_visit_document(const struct GraphQLAstDocument *def, void *arg)
 static int
 visit_operation_definition(const struct GraphQLAstOperationDefinition *def, void *arg)
 {
-	printf("visit_operation_definition\n");
 	struct lua_State *L = arg;
 
 	// len = #definitions
@@ -84,11 +83,8 @@ end_visit_operation_definition(const struct GraphQLAstOperationDefinition *def, 
 static int
 visit_selection_set(const struct GraphQLAstSelectionSet *def, void *arg)
 {
+	(void)def;
 	struct lua_State *L = arg;
-
-	int size = GraphQLAstSelectionSet_get_selections_size(def);
-
-	printf("visit_selection_set %d\n", size);
 
 	// selectionSet: {
 	lua_newtable(L);
@@ -109,7 +105,6 @@ static void
 end_visit_selection_set(const struct GraphQLAstSelectionSet *def, void *arg)
 {
 	int size = GraphQLAstSelectionSet_get_selections_size(def);
-	printf("end_visit_selection_set %d\n", size);
 
 	struct lua_State *L = arg;
 
@@ -224,7 +219,6 @@ end_visit_name(const struct GraphQLAstName *def, void *arg)
 static int
 visit_variable_definition(const struct GraphQLAstVariableDefinition *def, void *arg)
 {
-	printf("visit_variable_definition\n");
 	struct lua_State *L = arg;
 
 	lua_getfield(L, -1, "variableDefinitions");
@@ -343,10 +337,7 @@ end_visit_argument(const struct GraphQLAstArgument *def, void *arg)
 static int
 visit_variable(const struct GraphQLAstVariable *def, void *arg)
 {
-	const struct GraphQLAstName *name_node = GraphQLAstVariable_get_name(def);
-	const char *name = GraphQLAstName_get_value(name_node);
-
-	printf("visit_variable %s\n", name);
+	(void)def;
 
 	struct lua_State *L = arg;
 	lua_newtable(L);
@@ -436,7 +427,6 @@ end_visit_object_field(const struct GraphQLAstObjectField *def, void *arg)
 static int																			\
 visit_##type##_value(const struct GraphQLAst##snake_type##Value *def, void *arg) 	\
 {																					\
-    printf("visit_"#type"_value\n");												\
 	struct lua_State *L = arg;														\
 	lua_newtable(L);																\
 																					\
@@ -816,11 +806,10 @@ graphql_parse(struct lua_State *L)
 	return 1;
 }
 
-/* exported function */
 LUA_API int
-luaopen_ckit_lib(lua_State *L)
+luaopen_luagraphqlparser_lib(lua_State *L)
 {
-	/* result returned from require('ckit.lib') */
+	/* result returned from require('luagraphqlparser.lib') */
 	lua_newtable(L);
 	static const struct luaL_Reg meta [] = {
 		{"parse", graphql_parse},
