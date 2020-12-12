@@ -18,3 +18,8 @@ function g.test_subselections()
     ]]
     t.assert_equals(parse(query), cartridge_parse(query))
 end
+
+function g.test_in_operation_definition()
+    local query = [[ query @someRandomDirective { op } ]]
+    t.assert_equals(parse(query), cartridge_parse(query))
+end

@@ -72,9 +72,27 @@ end_visit_operation_definition(const struct GraphQLAstOperationDefinition *def, 
 	(void)def;
 	struct lua_State *L = arg;
 
-	lua_pushstring(L, "selectionSet");
-	lua_insert(L, -2);
-	lua_settable(L, -3);
+	int directive_size = GraphQLAstOperationDefinition_get_directives_size(def);
+	const struct GraphQLAstSelectionSet *sel_set = GraphQLAstOperationDefinition_get_selection_set(def);
+	if (sel_set != NULL) {
+		lua_pushstring(L, "selectionSet");
+		lua_insert(L, -2);
+		lua_settable(L, -3 - directive_size);
+	}
+
+	if (directive_size > 0) {
+		lua_newtable(L);
+		lua_insert(L, - directive_size - 1);
+		for (int i = 0; i < directive_size; i++) {
+			lua_pushnumber(L, directive_size - i);
+			lua_insert(L, -2);
+			lua_settable(L, -3 - directive_size + i + 1);
+		}
+
+		lua_pushstring(L, "directives");
+		lua_insert(L, -2);
+		lua_settable(L, -3);
+	}
 
 	// definitions[len + 1]: }
 	lua_settable(L, -3);
