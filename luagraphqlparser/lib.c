@@ -721,13 +721,41 @@ end_visit_inline_fragment(const struct GraphQLAstInlineFragment *def, void *arg)
 	(void)def;
 	struct lua_State *L = arg;
 
-	lua_pushstring(L, "selectionSet");
-	lua_insert(L, -2);
-	lua_settable(L, -4);
+	int directive_size = GraphQLAstInlineFragment_get_directives_size(def);
 
-	lua_pushstring(L, "typeCondition");
-	lua_insert(L, -2);
-	lua_settable(L, -3);
+	const struct GraphQLAstSelectionSet *sel_set = GraphQLAstInlineFragment_get_selection_set(def);
+	const struct GraphQLAstNamedType *named_type = GraphQLAstInlineFragment_get_type_condition(def);
+
+	int named_typed_offset = 0;
+	if (named_type != NULL) {
+		named_typed_offset += 1;
+	}
+
+	if (sel_set != NULL) {
+		lua_pushstring(L, "selectionSet");
+		lua_insert(L, -2);
+		lua_settable(L, -3 - named_typed_offset - directive_size);
+	}
+
+	if (directive_size > 0) {
+		lua_newtable(L);
+		lua_insert(L, - directive_size - 1);
+		for (int i = 0; i < directive_size; i++) {
+			lua_pushnumber(L, directive_size - i);
+			lua_insert(L, -2);
+			lua_settable(L, -3 - directive_size + i + 1);
+		}
+
+		lua_pushstring(L, "directives");
+		lua_insert(L, -2);
+		lua_settable(L, -3 - named_typed_offset);
+	}
+
+	if (named_type != NULL) {
+		lua_pushstring(L, "typeCondition");
+		lua_insert(L, -2);
+		lua_settable(L, -3);
+	}
 }
 
 static int

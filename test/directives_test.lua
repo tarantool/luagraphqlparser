@@ -28,3 +28,11 @@ function g.test_in_fragment_spread()
     local query = [[ {...a@skip} ]]
     t.assert_equals(parse(query), cartridge_parse(query))
 end
+
+function g.test_in_inline_fragment_spread()
+    local query = [[ {...on a@skip { a }} ]]
+    t.assert_equals(parse(query), cartridge_parse(query))
+
+    local query = [[ {...{a}} ]]
+    t.assert_equals(parse(query), cartridge_parse(query))
+end
