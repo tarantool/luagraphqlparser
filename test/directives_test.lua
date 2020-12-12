@@ -23,3 +23,8 @@ function g.test_in_operation_definition()
     local query = [[ query @someRandomDirective { op } ]]
     t.assert_equals(parse(query), cartridge_parse(query))
 end
+
+function g.test_in_fragment_spread()
+    local query = [[ {...a@skip} ]]
+    t.assert_equals(parse(query), cartridge_parse(query))
+end
