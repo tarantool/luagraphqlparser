@@ -237,6 +237,7 @@ end_visit_name(const struct GraphQLAstName *def, void *arg)
 static int
 visit_variable_definition(const struct GraphQLAstVariableDefinition *def, void *arg)
 {
+	(void)def;
 	struct lua_State *L = arg;
 
 	lua_getfield(L, -1, "variableDefinitions");
@@ -613,6 +614,7 @@ visit_list_type(const struct GraphQLAstListType *def, void *arg)
 static void
 end_visit_list_type(const struct GraphQLAstListType *def, void *arg)
 {
+	(void)def;
 	struct lua_State *L = arg;
 
 	lua_pushliteral(L, "type");
@@ -864,7 +866,7 @@ graphql_parse(struct lua_State *L)
 }
 
 LUA_API int
-luaopen_luagraphqlparser_lib(lua_State *L)
+luaopen_luagraphqlparser(lua_State *L)
 {
 	/* result returned from require('luagraphqlparser.lib') */
 	lua_newtable(L);

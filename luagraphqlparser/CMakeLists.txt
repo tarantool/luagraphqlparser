@@ -6,8 +6,7 @@ endif(APPLE)
 add_library(luagraphqlparser SHARED lib.c)
 add_dependencies(luagraphqlparser graphqlparser)
 target_link_libraries(luagraphqlparser graphqlparser)
-set_target_properties(luagraphqlparser PROPERTIES PREFIX "" OUTPUT_NAME "lib")
+set_target_properties(luagraphqlparser PROPERTIES PREFIX "" OUTPUT_NAME "luagraphqlparser")
 
 # Install module
-install(TARGETS luagraphqlparser LIBRARY DESTINATION ${TARANTOOL_INSTALL_LIBDIR}/${PROJECT_NAME}/)
-install(FILES init.lua DESTINATION ${TARANTOOL_INSTALL_LUADIR}/${PROJECT_NAME}/)
+install(TARGETS luagraphqlparser LIBRARY DESTINATION ${TARANTOOL_INSTALL_LIBDIR}/)
