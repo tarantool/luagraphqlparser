@@ -62,8 +62,8 @@ local start
 
 jit.off()
 start = clock.time()
-for _ = 1, count do
-    libgraphqlparser(query)
+for i = 1, count do
+    libgraphqlparser(queries[i])
 end
 jit_off_libgraphql = clock.time() - start
 
@@ -71,8 +71,8 @@ collectgarbage()
 collectgarbage()
 
 start = clock.time()
-for _ = 1, count do
-    lulpegparser(query)
+for i = 1, count do
+    lulpegparser(queries[i])
 end
 jit_off_lulpeg = clock.time() - start
 
