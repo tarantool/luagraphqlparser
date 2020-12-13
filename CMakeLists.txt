@@ -17,21 +17,11 @@ include_directories(${TARANTOOL_INCLUDE_DIRS})
 add_subdirectory(libgraphqlparser EXCLUDE_FROM_ALL)
 include_directories("${CMAKE_SOURCE_DIR}/libgraphqlparser" "${CMAKE_BINARY_DIR}/libgraphqlparser")
 
-set(CMAKE_INSTALL_RPATH "\$ORIGIN")
-
-if (APPLE)
-    install(FILES ${CMAKE_BINARY_DIR}/libgraphqlparser/libgraphqlparser.dylib
-            DESTINATION ${TARANTOOL_INSTALL_LIBDIR}/${PROJECT_NAME}/)
-else()
-    install(FILES ${CMAKE_BINARY_DIR}/libgraphqlparser/libgraphqlparser.so
-            DESTINATION ${TARANTOOL_INSTALL_LIBDIR}/${PROJECT_NAME}/)
-endif(APPLE)
-
 # Set CFLAGS
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Werror")
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} ${CMAKE_C_FLAGS}")
 # Set CXXFLAGS
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror -std=gnu++11")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${CMAKE_CXX_FLAGS}")
 
 # Build module
