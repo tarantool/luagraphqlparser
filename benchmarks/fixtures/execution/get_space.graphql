@@ -1,0 +1,39 @@
+query {
+  space {
+    name
+    id
+    engine
+    size
+    field_count
+    temporary
+    is_local
+    enabled
+    format {
+      name
+      type
+      is_nullable
+    }
+    index {
+      id
+      name
+      unique
+      parts {
+        fieldno
+        type
+        is_nullable
+      }
+      page_size
+      run_size_ratio
+      run_count_per_level
+      dimension
+      bloom_fpr
+      distance
+      range_size
+    }
+    ck_constraint {
+      name
+      is_enabled
+      expr
+    }
+  }
+}

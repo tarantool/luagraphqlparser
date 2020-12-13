@@ -1,0 +1,30 @@
+mutation SpaceAdd($name: String, $engine: SpaceEngine, $is_local: Boolean, $temporary: Boolean, $format: [SpaceFieldInput], $index: [SpaceIndexInput], $ck_constraint: [SpaceCkConstraintInput]) {
+  space_add(name: $name, engine: $engine, is_local: $is_local, temporary: $temporary, format: $format, index: $index, ck_constraint: $ck_constraint) {
+    id
+    name
+    engine
+    is_local
+    temporary
+    format {
+      name
+      type
+      is_nullable
+    }
+    index {
+      id
+      name
+      type
+      unique
+      parts {
+        type
+        fieldno
+        is_nullable
+      }
+    }
+    ck_constraint {
+      name
+      is_enabled
+      expr
+    }
+  }
+}

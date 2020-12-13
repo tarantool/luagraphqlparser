@@ -1,0 +1,14 @@
+query {
+  space {
+		id
+    name
+    enabled
+    temporary
+    
+    is_local
+    format {
+      name
+      type
+    }
+  }
+}

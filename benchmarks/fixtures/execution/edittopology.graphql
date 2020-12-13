@@ -1,0 +1,9 @@
+mutation editTopology($replicasets: [EditReplicasetInput!], $servers: [EditServerInput!]) {
+  cluster {
+    edit_topology(replicasets: $replicasets, servers: $servers) {
+      servers {
+        uuid
+      }
+    }
+  }
+}
