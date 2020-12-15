@@ -442,28 +442,28 @@ end_visit_object_field(const struct GraphQLAstObjectField *def, void *arg)
 	lua_settable(L, -3);
 }
 
-#define VISIT_SINGLE_VALUE(type, snake_type) 										\
-static int																			\
-visit_##type##_value(const struct GraphQLAst##snake_type##Value *def, void *arg) 	\
-{																					\
-	struct lua_State *L = arg;														\
-	lua_newtable(L);																\
-																					\
-	const char *value = GraphQLAst##snake_type##Value_get_value(def);				\
-																					\
-	lua_pushliteral(L, "value");													\
-	lua_pushstring(L, value);														\
-	lua_settable(L, -3);															\
-																					\
-	lua_pushliteral(L, "kind");														\
-	lua_pushliteral(L, #type);														\
-	lua_settable(L, -3);															\
-																					\
-	return 1;																		\
+#define VISIT_SINGLE_VALUE(type, snake_type) 						\
+static int										\
+visit_##type##_value(const struct GraphQLAst##snake_type##Value *def, void *arg)	\
+{											\
+	struct lua_State *L = arg;							\
+	lua_newtable(L);								\
+											\
+	const char *value = GraphQLAst##snake_type##Value_get_value(def);		\
+											\
+	lua_pushliteral(L, "value");							\
+	lua_pushstring(L, value);							\
+	lua_settable(L, -3);								\
+											\
+	lua_pushliteral(L, "kind");							\
+	lua_pushliteral(L, #type);							\
+	lua_settable(L, -3);								\
+											\
+	return 1;									\
 }
 
-#define END_VISIT_SINGLE_VALUE(type, snake_type) 									\
-static void																			\
+#define END_VISIT_SINGLE_VALUE(type, snake_type) 					\
+static void										\
 end_visit_##type##_value() { }
 
 VISIT_SINGLE_VALUE(int, Int)
