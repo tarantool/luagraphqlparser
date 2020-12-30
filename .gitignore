@@ -26,3 +26,5 @@ Testing
 cmake-build-debug/
 build.luarocks/
 .idea/
+.rocks/
+graphql-lua
