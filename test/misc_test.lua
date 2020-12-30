@@ -2,7 +2,7 @@ local t = require('luatest')
 local g = t.group()
 
 local parse = require('luagraphqlparser').parse
-local cartridge_parse = require('cartridge.graphql.parse').parse
+local luagraphql_parse = require('graphql.parse')
 
 function g.test_operation_name()
     local query = [[
@@ -15,7 +15,7 @@ function g.test_operation_name()
           }
         }
 ]]
-    t.assert_equals(parse(query), cartridge_parse(query))
+    t.assert_equals(parse(query), luagraphql_parse(query))
 end
 
 function g.test_comment()
@@ -30,7 +30,7 @@ function g.test_comment()
         }
         # Comment
 ]]
-    t.assert_equals(parse(query), cartridge_parse(query))
+    t.assert_equals(parse(query), luagraphql_parse(query))
 end
 
 function g.test_metafields()
@@ -50,5 +50,5 @@ function g.test_metafields()
           }
         }
 ]]
-    t.assert_equals(parse(query), cartridge_parse(query))
+    t.assert_equals(parse(query), luagraphql_parse(query))
 end

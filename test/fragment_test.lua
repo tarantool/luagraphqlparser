@@ -2,20 +2,20 @@ local t = require('luatest')
 local g = t.group()
 
 local parse = require('luagraphqlparser').parse
-local cartridge_parse = require('cartridge.graphql.parse').parse
+local luagraphql_parse = require('graphql.parse')
 
 function g.test_simple_fragment_definition()
     local query = [[
         fragment f on Obj { k }
     ]]
-    t.assert_equals(parse(query), cartridge_parse(query))
+    t.assert_equals(parse(query), luagraphql_parse(query))
 end
 
 function g.test_simple_fragment_definition_with_alias()
     local query = [[
         fragment f on Obj { a: k }
     ]]
-    t.assert_equals(parse(query), cartridge_parse(query))
+    t.assert_equals(parse(query), luagraphql_parse(query))
 end
 
 function g.test_fragment_definition()
@@ -25,14 +25,14 @@ function g.test_fragment_definition()
             value { nested_obj { nested_field } }
          }
     ]]
-    t.assert_equals(parse(query), cartridge_parse(query))
+    t.assert_equals(parse(query), luagraphql_parse(query))
 end
 
 function g.test_fragment_spread()
     local query = [[
         { query { ...spread } }
     ]]
-    t.assert_equals(parse(query), cartridge_parse(query))
+    t.assert_equals(parse(query), luagraphql_parse(query))
 end
 
 function g.test_fragment_complex()
@@ -54,7 +54,7 @@ function g.test_fragment_complex()
             }
         }
     ]]
-    t.assert_equals(parse(query), cartridge_parse(query))
+    t.assert_equals(parse(query), luagraphql_parse(query))
 end
 
 function g.test_fragment_with_variables()
@@ -80,12 +80,12 @@ function g.test_fragment_with_variables()
           }
         }
     ]]
-    t.assert_equals(parse(query), cartridge_parse(query))
+    t.assert_equals(parse(query), luagraphql_parse(query))
 end
 
 function g.test_fragment_inline_simple()
     local query = [[ { value { ... on Human { height } } } ]]
-    t.assert_equals(parse(query), cartridge_parse(query))
+    t.assert_equals(parse(query), luagraphql_parse(query))
 end
 
 function g.test_fragment_inline_complex()
@@ -102,5 +102,5 @@ function g.test_fragment_inline_complex()
           }
         }
     ]]
-    t.assert_equals(parse(query), cartridge_parse(query))
+    t.assert_equals(parse(query), luagraphql_parse(query))
 end

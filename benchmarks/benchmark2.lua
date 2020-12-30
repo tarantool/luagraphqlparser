@@ -38,6 +38,9 @@ local function test_perf(folder, iterations)
     folder = fio.pathjoin(debug.sourcedir(), folder)
     if fio.path.is_dir(folder) then
         local files_list, err = fio.glob(fio.pathjoin(folder, '*.graphql'))
+        if err ~= nil then
+            error(err)
+        end
         if files_list then
             for _, file in ipairs(files_list) do
                 local item = {
@@ -78,6 +81,9 @@ local function test_perf(folder, iterations)
             for _ = 1, iterations do
                 start = clock.monotonic64()
                 vanilla_parse, err = Parse_Error:pcall(parse.parse, request.request)
+                if err ~= nil then
+                    error(err)
+                end
                 duration = clock.monotonic64() - start
                 if vanilla_parse then
                     requests[index].vanilla = requests[index].vanilla + tonumber(duration)
