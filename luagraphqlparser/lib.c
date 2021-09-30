@@ -668,7 +668,7 @@ end_visit_fragment_definition(const struct GraphQLAstFragmentDefinition *def, vo
 
 		lua_pushliteral(L, "directives");
 		lua_insert(L, -2);
-		lua_settable(L, -3);
+		lua_settable(L, -4);
 	}
 
 	lua_pushliteral(L, "typeCondition");

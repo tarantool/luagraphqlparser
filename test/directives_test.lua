@@ -45,13 +45,13 @@ function g.test_with_fragment()
         definitions = {
             {
                 typeCondition = {
-                    directives = {
-                        {name = {kind = 'name', value = 'foo'}, kind = 'directive'},
-                    },
                     name = {
                         kind = 'name', value = 'Y',
                     },
                     kind = 'namedType',
+                },
+                directives = {
+                    {name = {kind = 'name', value = 'foo'}, kind = 'directive'},
                 },
                 selectionSet = {
                     selections = {
