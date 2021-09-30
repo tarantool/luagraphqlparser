@@ -650,12 +650,26 @@ visit_fragment_definition(const struct GraphQLAstFragmentDefinition *def, void *
 static void
 end_visit_fragment_definition(const struct GraphQLAstFragmentDefinition *def, void *arg)
 {
-	(void)def;
+	int directive_size = GraphQLAstFragmentDefinition_get_directives_size(def);
 	struct lua_State *L = arg;
 
 	lua_pushliteral(L, "selectionSet");
 	lua_insert(L, -2);
-	lua_settable(L, -4);
+	lua_settable(L, -4 - directive_size);
+
+	if (directive_size > 0) {
+		lua_createtable(L, directive_size, 0);
+		lua_insert(L, - directive_size - 1);
+		for (int i = 0; i < directive_size; i++) {
+			lua_pushnumber(L, directive_size - i);
+			lua_insert(L, -2);
+			lua_settable(L, -3 - directive_size + i + 1);
+		}
+
+		lua_pushliteral(L, "directives");
+		lua_insert(L, -2);
+		lua_settable(L, -3);
+	}
 
 	lua_pushliteral(L, "typeCondition");
 	lua_insert(L, -2);

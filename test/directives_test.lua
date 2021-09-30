@@ -36,3 +36,34 @@ function g.test_in_inline_fragment_spread()
     local query = [[ {...{a}} ]]
     t.assert_equals(parse(query), luagraphql_parse(query))
 end
+
+function g.test_with_fragment()
+    local query = 'fragment X on Y\n@foo\n{ name }'
+    -- We don't use old (Lua-implemented) graphql parser here
+    -- since it doesn't support such declaration.
+    local expected = {
+        definitions = {
+            {
+                typeCondition = {
+                    directives = {
+                        {name = {kind = 'name', value = 'foo'}, kind = 'directive'},
+                    },
+                    name = {
+                        kind = 'name', value = 'Y',
+                    },
+                    kind = 'namedType',
+                },
+                selectionSet = {
+                    selections = {
+                        {name = {kind = 'name', value = 'name'}, kind = 'field'},
+                    },
+                    kind = 'selectionSet',
+                },
+                name = {kind = 'name', value = 'X'},
+                kind = 'fragmentDefinition',
+            }
+        },
+        kind = 'document',
+    }
+    t.assert_equals(parse(query), expected)
+end
