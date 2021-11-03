@@ -2,7 +2,7 @@ package = 'luagraphqlparser'
 version = 'scm-1'
 
 source  = {
-    url    = 'git://github.com/tarantool/luagraphqlparser.git';
+    url    = 'git+https://github.com/tarantool/luagraphqlparser.git';
     branch = 'master';
 }
 
