@@ -2,7 +2,7 @@ package = 'luagraphqlparser'
 version = '0.2.0-1'
 
 source  = {
-    url    = 'git://github.com/tarantool/luagraphqlparser.git';
+    url    = 'git+https://github.com/tarantool/luagraphqlparser.git';
     tag = '0.2.0';
 }
 
