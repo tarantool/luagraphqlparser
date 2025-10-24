@@ -13,10 +13,10 @@ jobs:
       matrix:
         tarantool: ["2.10"]
       fail-fast: false
-    runs-on: [ubuntu-latest]
+    runs-on: [ubuntu-22.04]
     steps:
       - uses: actions/checkout@v5
-      - uses: tarantool/setup-tarantool@v3
+      - uses: tarantool/setup-tarantool@v4
         with:
           tarantool-version: ${{ matrix.tarantool }}
 
