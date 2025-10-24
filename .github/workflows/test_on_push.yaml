@@ -19,7 +19,9 @@ jobs:
       - uses: tarantool/setup-tarantool@v4
         with:
           tarantool-version: ${{ matrix.tarantool }}
-      - run: sudo apt install https://github.com/tarantool/tt/releases/download/v2.11.0/tt_2.11.0_amd64.deb
+      - run: |
+         wget -O /tmp/tt.deb https://github.com/tarantool/tt/releases/download/v2.11.0/tt_2.11.0_amd64.deb
+         sudo apt install /tmp/tt.deb
 
       - name: Build module
         run: |
