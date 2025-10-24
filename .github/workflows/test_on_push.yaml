@@ -11,22 +11,22 @@ jobs:
       github.event_name == 'pull_request' && github.event.pull_request.head.repo.owner.login != 'tarantool'
     strategy:
       matrix:
-        tarantool: ["1.10", "2.6", "2.7"]
+        tarantool: ["2.11"]
       fail-fast: false
     runs-on: [ubuntu-latest]
     steps:
-      - uses: actions/checkout@v2
-      - uses: tarantool/setup-tarantool@v1
+      - uses: actions/checkout@v5
+      - uses: tarantool/setup-tarantool@v4
         with:
           tarantool-version: ${{ matrix.tarantool }}
 
       - name: Build module
         run: |
-          tarantoolctl rocks make
+          tt rocks make
 
       - name: Run linter
         run: |
-          tarantoolctl rocks install luacheck 0.25.0
+          tt rocks install luacheck 0.25.0
           .rocks/bin/luacheck .
 
       - name: Run tests
@@ -34,6 +34,6 @@ jobs:
           git clone https://github.com/bjornbytes/graphql-lua
           sed -i 's/lpeg/lulpeg/g' graphql-lua/graphql-0.0.2-1.rockspec
           sed -i "s/local lpeg = require 'lpeg'/local lpeg = require 'lulpeg'/g" graphql-lua/graphql/parse.lua
-          tarantoolctl rocks make --chdir graphql-lua
-          tarantoolctl rocks install luatest 0.5.2
+          tt rocks make --chdir graphql-lua
+          tt rocks install luatest 0.5.2
           .rocks/bin/luatest -v
