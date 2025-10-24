@@ -22,11 +22,11 @@ jobs:
 
       - name: Build module
         run: |
-          tt rocks make
+          tarantoolctl rocks make
 
       - name: Run linter
         run: |
-          tt rocks install luacheck 0.25.0
+          tarantoolctl rocks install luacheck 0.25.0
           .rocks/bin/luacheck .
 
       - name: Run tests
@@ -34,6 +34,6 @@ jobs:
           git clone https://github.com/bjornbytes/graphql-lua
           sed -i 's/lpeg/lulpeg/g' graphql-lua/graphql-0.0.2-1.rockspec
           sed -i "s/local lpeg = require 'lpeg'/local lpeg = require 'lulpeg'/g" graphql-lua/graphql/parse.lua
-          tt rocks make --chdir graphql-lua
-          tt rocks install luatest 0.5.2
+          tarantoolctl rocks make --chdir graphql-lua
+          tarantoolctl rocks install luatest 0.5.2
           .rocks/bin/luatest -v
