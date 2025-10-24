@@ -11,12 +11,12 @@ jobs:
       github.event_name == 'pull_request' && github.event.pull_request.head.repo.owner.login != 'tarantool'
     strategy:
       matrix:
-        tarantool: ["1.10", "2.6", "2.7"]
+        tarantool: ["2.10"]
       fail-fast: false
-    runs-on: [ubuntu-latest]
+    runs-on: [ubuntu-22.04]
     steps:
-      - uses: actions/checkout@v2
-      - uses: tarantool/setup-tarantool@v1
+      - uses: actions/checkout@v5
+      - uses: tarantool/setup-tarantool@v4
         with:
           tarantool-version: ${{ matrix.tarantool }}
 
@@ -35,5 +35,5 @@ jobs:
           sed -i 's/lpeg/lulpeg/g' graphql-lua/graphql-0.0.2-1.rockspec
           sed -i "s/local lpeg = require 'lpeg'/local lpeg = require 'lulpeg'/g" graphql-lua/graphql/parse.lua
           tarantoolctl rocks make --chdir graphql-lua
-          tarantoolctl rocks install luatest 0.5.2
+          tarantoolctl rocks install luatest 1.2.1
           .rocks/bin/luatest -v

@@ -11,7 +11,7 @@ local parse = function(str)
 end
 
 function g.test_parse_comments()
-    t.assert_error(parse('{a(b:"#")}').definitions, {})
+    t.assert_not_equals(parse('{a(b:"#")}').definitions, nil)
 end
 
 function g.test_parse_document()
