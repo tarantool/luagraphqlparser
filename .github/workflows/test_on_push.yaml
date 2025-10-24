@@ -35,6 +35,7 @@ jobs:
       - name: Run tests
         run: |
           git clone https://github.com/bjornbytes/graphql-lua
+          tt rocks install https://luarocks.org/manifests/gvvaughan/lpeg-1.1.0-2.rockspec
           tt rocks make --chdir graphql-lua
           tt rocks install luatest 1.2.1
           .rocks/bin/luatest -v
